@@ -8,6 +8,7 @@ SPORT_KEY = "baseball_mlb"
 REGIONS   = "us"
 ODDS_FMT  = "american"
 DATE_FMT  = "iso"
+PATH = r"C:/Users/charl/Downloads/OddsFetched/odds.json" # ADD PATHNAME HERE CHRISTOPHER
 
 # The only supported markets for MLB on the main odds endpoint:
 FEATURED_MARKETS = ["h2h", "spreads", "totals"]
@@ -66,7 +67,7 @@ if __name__ == "__main__":
     games = fetch_featured_odds(desired_markets)
 
     # Write the raw JSON to a specific file path
-    with open(r"C:/Users/charl/Downloads/OddsFetched/odds.json", "w") as f:
+    with open(PATH, "w") as f:
         json.dump(games, f, indent=2)
     print("Saved featured odds to C:\\Users\\charl\\Documents\\odds.json")
 
@@ -97,10 +98,9 @@ if __name__ == "__main__":
         eid = game["id"]
         full = fetch_event_odds(eid, EXTRA_MARKETS)
         # Append additional markets to the same file
-        with open(r"C:/Users/charl/Downloads/OddsFetched/odds.json", "a") as f:
+        with open(PATH, "a") as f:
             f.write('\n')
             json.dump(full, f, indent=2)
-        print(f"Saved additional markets for event {eid} to C:/Users/charl/Downloads/OddsFetched/odds.json")
         print(f"--- Additional markets for event {eid} ---")
         for book in full["bookmakers"]:
             for m in book["markets"]:
