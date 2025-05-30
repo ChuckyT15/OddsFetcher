@@ -8,7 +8,7 @@ Fetches odds from public APIs for positive EV model.
 4) Upload .csv file to ChatGPT before asking it
 5) Enjoy!
 
-Note: you will get 14 pulls a month from one account, so get another API key from another gmail account and switch it when you need another pull
+Note: you will get 14 pulls a month from one account, so get another API key from another gmail account and switch it when you need another pull. One pull gives 3 days worth of odds.
 
 Link to get another account: https://the-odds-api.com/
 
