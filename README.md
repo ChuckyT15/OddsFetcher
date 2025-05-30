@@ -9,4 +9,5 @@ Fetches odds from public APIs for positive EV model.
 5) Enjoy!
 
 Note: you will get 14 pulls a month from one account, so get another API key from another gmail account and switch it when you need another pull
+
 Note: I'm gonna touch you Christian 🥀
