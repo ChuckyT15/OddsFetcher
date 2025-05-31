@@ -16,7 +16,7 @@ Link to get another account: https://the-odds-api.com/
 
 # fetchstatsMLB.py
 # HOW TO USE:
-1) Run this command in terminal: pip install MLB-StatsAPI
+1) Run this command in terminal: pip install MLB-StatsAPI (only have to do once)
 2) Change the pathname (at the top of the fetchodds.py file with the comment on the right) to where you want to store it on your computer
 3) Hit the run button at the top right
 4) Upload .csv file to ChatGPT FIRST before pasting prompt
