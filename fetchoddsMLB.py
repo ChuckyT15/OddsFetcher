@@ -51,6 +51,36 @@ def fetch_event_odds(event_id, extra_markets):
     return resp.json()
 
 
+def write_odds_row(writer, game_info, bookmaker, market, outcome):
+    """Helper function to write a row with enhanced player information"""
+    # Extract player information for player props
+    outcome_name = outcome['name']
+    player_name = outcome.get('player_name', '')
+    description = outcome.get('description', '')
+    
+    # For player props, combine the information for better clarity
+    if player_name:
+        if description and description != outcome_name:
+            full_outcome_name = f"{player_name} - {description}"
+        else:
+            full_outcome_name = f"{player_name} - {outcome_name}"
+    else:
+        full_outcome_name = outcome_name
+    
+    writer.writerow({
+        'commence_time': game_info['commence_time'],
+        'away_team': game_info['away_team'],
+        'home_team': game_info['home_team'],
+        'bookmaker': bookmaker,
+        'market_key': market,
+        'outcome_name': full_outcome_name,
+        'player_name': player_name,
+        'description': description,
+        'price': outcome['price'],
+        'point': outcome.get('point', '')  # For spreads and totals
+    })
+
+
 if __name__ == "__main__":
     # Fetch featured odds
     desired_markets = FEATURED_MARKETS + ["player_props"]
@@ -63,57 +93,71 @@ if __name__ == "__main__":
         if datetime.fromisoformat(g["commence_time"].replace("Z", "+00:00")).date() == today
     ]
 
-    # Open CSV for writing
+    # Open CSV for writing with enhanced fieldnames
     with open(CSV_PATH, mode='w', newline='', encoding='utf-8') as csvfile:
         fieldnames = [
             'commence_time', 'away_team', 'home_team',
-            'bookmaker', 'market_key', 'outcome_name', 'price'
+            'bookmaker', 'market_key', 'outcome_name', 
+            'player_name', 'description', 'price', 'point'
         ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
 
         # Write featured odds rows
         for game in today_games:
-            time = game['commence_time']
-            away = game['away_team']
-            home = game['home_team']
+            game_info = {
+                'commence_time': game['commence_time'],
+                'away_team': game['away_team'],
+                'home_team': game['home_team']
+            }
+            
             for book in game['bookmakers']:
                 bookmaker = book.get('title', book.get('key'))
                 for m in book['markets']:
                     market = m['key']
                     for o in m['outcomes']:
-                        writer.writerow({
-                            'commence_time': time,
-                            'away_team': away,
-                            'home_team': home,
-                            'bookmaker': bookmaker,
-                            'market_key': market,
-                            'outcome_name': o['name'],
-                            'price': o['price']
-                        })
+                        write_odds_row(writer, game_info, bookmaker, market, o)
 
         # Fetch and write additional markets
         EXTRA_MARKETS = [
             "batter_home_runs",
-            "batter_hits",
+            "batter_hits", 
+            "batter_rbis",
+            "batter_runs_scored",
+            "batter_stolen_bases",
+            "batter_singles",
+            "batter_doubles",
+            "batter_triples",
+            "batter_walks",
+            "batter_strikeouts",
+            "batter_hits_runs_rbis",
             "pitcher_strikeouts",
+            "pitcher_hits_allowed",
+            "pitcher_walks",
+            "pitcher_earned_runs",
+            "pitcher_outs",
             "totals_1st_5_innings",
         ]
+        
         for game in today_games:
-            full = fetch_event_odds(game['id'], EXTRA_MARKETS)
-            for book in full['bookmakers']:
-                bookmaker = book.get('title', book.get('key'))
-                for m in book['markets']:
-                    market = m['key']
-                    for o in m['outcomes']:
-                        writer.writerow({
-                            'commence_time': full.get('commence_time', game['commence_time']),
-                            'away_team': full.get('away_team', game['away_team']),
-                            'home_team': full.get('home_team', game['home_team']),
-                            'bookmaker': bookmaker,
-                            'market_key': market,
-                            'outcome_name': o['name'],
-                            'price': o['price']
-                        })
+            try:
+                full = fetch_event_odds(game['id'], EXTRA_MARKETS)
+                game_info = {
+                    'commence_time': full.get('commence_time', game['commence_time']),
+                    'away_team': full.get('away_team', game['away_team']),
+                    'home_team': full.get('home_team', game['home_team'])
+                }
+                
+                for book in full['bookmakers']:
+                    bookmaker = book.get('title', book.get('key'))
+                    for m in book['markets']:
+                        market = m['key']
+                        for o in m['outcomes']:
+                            write_odds_row(writer, game_info, bookmaker, market, o)
+                            
+            except HTTPError as e:
+                print(f"Error fetching additional markets for game {game['id']}: {e}")
+                continue
 
     print(f"Exported odds to CSV: {CSV_PATH}")
+    print("Player names are now included in separate 'player_name' column and combined in 'outcome_name' for player props.")
