@@ -1,6 +1,6 @@
 import requests
 import csv
-from datetime import datetime, date
+from datetime import datetime, date, time, timezone
 from requests.exceptions import HTTPError
 
 API_KEY   = "04d4c837f7bcb3224dd30c6adc55becc"
@@ -86,12 +86,27 @@ if __name__ == "__main__":
     desired_markets = FEATURED_MARKETS + ["player_props"]
     games = fetch_featured_odds(desired_markets)
 
-    # Filter today's games
-    today = date.today()
-    today_games = [
-        g for g in games
-        if datetime.fromisoformat(g["commence_time"].replace("Z", "+00:00")).date() == today
-    ]
+    # Filter games for today until 11:59 PM local time
+    now = datetime.now()
+    today_start = datetime.combine(now.date(), time.min)  # Today at 00:00:00
+    today_end = datetime.combine(now.date(), time(23, 59, 59))  # Today at 23:59:59
+    
+    print(f"Looking for games between {today_start} and {today_end} local time")
+    
+    today_games = []
+    for g in games:
+        # Parse the UTC time from API
+        game_time_utc = datetime.fromisoformat(g["commence_time"].replace("Z", "+00:00"))
+        # Convert to local time for comparison
+        game_time_local = game_time_utc.replace(tzinfo=timezone.utc).astimezone()
+        # Remove timezone info for comparison with naive datetime
+        game_time_local_naive = game_time_local.replace(tzinfo=None)
+        
+        if today_start <= game_time_local_naive <= today_end:
+            today_games.append(g)
+            print(f"Including game: {g['away_team']} @ {g['home_team']} at {game_time_local_naive}")
+    
+    print(f"Found {len(today_games)} games for today")
 
     # Open CSV for writing with enhanced fieldnames
     with open(CSV_PATH, mode='w', newline='', encoding='utf-8') as csvfile:
