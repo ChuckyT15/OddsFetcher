@@ -21,5 +21,3 @@ Link to get another account: https://the-odds-api.com/
 3) Hit the run button at the top right
 4) Upload .csv file to ChatGPT FIRST before pasting prompt
 5) Enjoy!
-
-Note: I'm gonna touch you Christian 🥀
