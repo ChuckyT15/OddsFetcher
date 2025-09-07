@@ -58,7 +58,6 @@ def write_odds_row(writer, game_info, bookmaker, market, outcome):
     player_name = outcome.get('player_name', '')
     description = outcome.get('description', '')
     
-    # For player props, combine the information for better clarity
     if player_name:
         if description and description != outcome_name:
             full_outcome_name = f"{player_name} - {description}"
@@ -95,11 +94,8 @@ if __name__ == "__main__":
     
     today_games = []
     for g in games:
-        # Parse the UTC time from API
         game_time_utc = datetime.fromisoformat(g["commence_time"].replace("Z", "+00:00"))
-        # Convert to local time for comparison
         game_time_local = game_time_utc.replace(tzinfo=timezone.utc).astimezone()
-        # Remove timezone info for comparison with naive datetime
         game_time_local_naive = game_time_local.replace(tzinfo=None)
         
         if today_start <= game_time_local_naive <= today_end:
@@ -108,7 +104,6 @@ if __name__ == "__main__":
     
     print(f"Found {len(today_games)} games for today")
 
-    # Open CSV for writing with enhanced fieldnames
     with open(CSV_PATH, mode='w', newline='', encoding='utf-8') as csvfile:
         fieldnames = [
             'commence_time', 'away_team', 'home_team',
@@ -176,3 +171,4 @@ if __name__ == "__main__":
 
     print(f"Exported odds to CSV: {CSV_PATH}")
     print("Player names are now included in separate 'player_name' column and combined in 'outcome_name' for player props.")
+
