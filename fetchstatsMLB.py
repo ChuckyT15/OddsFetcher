@@ -60,7 +60,6 @@ def fetch_all_hitting_stats(season_year):
                     "playerId": player_id,
                     "playerName": player_name
                 }
-                # Prefix each hitting metric with "hitting_"
                 for fld, val in stat_values.items():
                     row[f"hitting_{fld}"] = val
                 batch_rows.append(row)
@@ -96,7 +95,7 @@ def fetch_all_pitching_stats(season_year):
         raw = statsapi.get("stats", params)
         stats_blocks = raw.get("stats", [])
 
-        # If no stats returned or all splits empty, we’re done.
+        # If no stats returned or all splits empty, break
         if not stats_blocks or all(len(block.get("splits", [])) == 0 for block in stats_blocks):
             break
 
@@ -110,7 +109,6 @@ def fetch_all_pitching_stats(season_year):
                     "playerId": player_id,
                     "playerName": player_name
                 }
-                # Prefix each pitching metric with "pitching_"
                 for fld, val in stat_values.items():
                     row[f"pitching_{fld}"] = val
                 batch_rows.append(row)
@@ -154,7 +152,6 @@ def fetch_all_team_hitting_stats(season_year):
             "teamId": team_id,
             "teamName": team_name
         }
-        # Prefix each metric with "team_hitting_"
         for fld, val in stat_values.items():
             row[f"team_hitting_{fld}"] = val
         rows.append(row)
