@@ -46,7 +46,7 @@ def fetch_all_hitting_stats(season_year):
         raw = statsapi.get("stats", params)
         stats_blocks = raw.get("stats", [])
 
-        # If no stats returned or all splits empty, we’re done.
+        # If no stats returned or all splits empty, break
         if not stats_blocks or all(len(block.get("splits", [])) == 0 for block in stats_blocks):
             break
 
