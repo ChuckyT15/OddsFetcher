@@ -19,14 +19,6 @@ import datetime
 import os
 
 # ─── EDIT THESE TO YOUR DESIRED OUTPUT FILEPATHS ───
-# Example (Windows):
-#   OUTPUT_PLAYER_CSV_PATH = r"C:\Users\charl\Downloads\player_stats.csv"
-#   OUTPUT_TEAM_CSV_PATH   = r"C:\Users\charl\Downloads\team_stats.csv"
-#
-# Example (macOS/Linux):
-#   OUTPUT_PLAYER_CSV_PATH = "/Users/charl/Downloads/player_stats.csv"
-#   OUTPUT_TEAM_CSV_PATH   = "/Users/charl/Downloads/team_stats.csv"
-#
 OUTPUT_PLAYER_CSV_PATH = r"C:/Users/charl/Downloads/OddsFetched/player_stats.csv"
 OUTPUT_TEAM_CSV_PATH   = r"C:/Users/charl/Downloads/OddsFetched/team_stats.csv"
 # ─────────────────────────────────────────────────────────
@@ -208,7 +200,6 @@ def fetch_all_team_pitching_stats(season_year):
 
 
 def main():
-    # 1) Ensure output directories exist
     player_output_dir = os.path.dirname(OUTPUT_PLAYER_CSV_PATH)
     team_output_dir = os.path.dirname(OUTPUT_TEAM_CSV_PATH)
     if player_output_dir and not os.path.isdir(player_output_dir):
@@ -218,17 +209,10 @@ def main():
 
     current_year = datetime.date.today().year
 
-    # 2) Fetch player hitting stats
-    print(f"Fetching all hitting stats for {current_year} (paginated)...")
     hitting_df = fetch_all_hitting_stats(current_year)
-    print(f"  → Retrieved hitting stats for {len(hitting_df)} rows.")
 
-    # 3) Fetch player pitching stats
-    print(f"Fetching all pitching stats for {current_year} (paginated)...")
     pitching_df = fetch_all_pitching_stats(current_year)
-    print(f"  → Retrieved pitching stats for {len(pitching_df)} rows.")
 
-    # 4) Merge player DataFrames on playerId (outer join)
     merged_players = pd.merge(
         hitting_df,
         pitching_df,
@@ -238,7 +222,6 @@ def main():
         copy=False
     )
 
-    # 5) Reconstruct a single "playerName" column if pandas added suffixes
     if "playerName_hit" in merged_players.columns or "playerName_pit" in merged_players.columns:
         merged_players["playerName"] = (
             merged_players.get("playerName_hit", pd.Series(dtype="object"))
@@ -250,14 +233,12 @@ def main():
             inplace=True
         )
     elif "playerName" not in merged_players.columns:
-        # Edge‐case: neither side had playerName
         hit_map = hitting_df.set_index("playerId")["playerName"].to_dict() if "playerName" in hitting_df.columns else {}
         pit_map = pitching_df.set_index("playerId")["playerName"].to_dict() if "playerName" in pitching_df.columns else {}
         merged_players["playerName"] = merged_players["playerId"].map(hit_map).fillna(
             merged_players["playerId"].map(pit_map)
         )
 
-    # 6) Reorder player columns: playerId, playerName, hitting_*, pitching_*
     cols = ["playerId"]
     if "playerName" in merged_players.columns:
         cols.append("playerName")
@@ -266,21 +247,12 @@ def main():
     cols += hitting_cols + pitching_cols
     merged_players = merged_players[[c for c in cols if c in merged_players.columns]]
 
-    # 7) Write player_stats.csv
     merged_players.to_csv(OUTPUT_PLAYER_CSV_PATH, index=False)
-    print(f"\nWrote {len(merged_players)} player rows to:\n  {OUTPUT_PLAYER_CSV_PATH}")
 
-    # 8) Fetch all teams’ hitting stats
-    print(f"\nFetching all team hitting stats for {current_year}...")
     team_hitting_df = fetch_all_team_hitting_stats(current_year)
-    print(f"  → Retrieved team hitting stats for {len(team_hitting_df)} teams.")
 
-    # 9) Fetch all teams’ pitching stats
-    print(f"Fetching all team pitching stats for {current_year}...")
     team_pitching_df = fetch_all_team_pitching_stats(current_year)
-    print(f"  → Retrieved team pitching stats for {len(team_pitching_df)} teams.")
 
-    # 10) Merge team‐level hitting/pitching on teamId, teamName (outer join)
     merged_teams = pd.merge(
         team_hitting_df,
         team_pitching_df,
@@ -289,14 +261,12 @@ def main():
         copy=False
     )
 
-    # 11) Reorder team columns: teamId, teamName, team_hitting_*, team_pitching_*
     team_cols = ["teamId", "teamName"]
     hitting_cols = sorted([c for c in merged_teams.columns if c.startswith("team_hitting_")])
     pitching_cols = sorted([c for c in merged_teams.columns if c.startswith("team_pitching_")])
     team_cols += hitting_cols + pitching_cols
     merged_teams = merged_teams[[c for c in team_cols if c in merged_teams.columns]]
 
-    # 12) Write team_stats.csv
     merged_teams.to_csv(OUTPUT_TEAM_CSV_PATH, index=False)
     print(f"\nWrote {len(merged_teams)} team rows to:\n  {OUTPUT_TEAM_CSV_PATH}")
 
