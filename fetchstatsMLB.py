@@ -19,8 +19,8 @@ import datetime
 import os
 
 # ─── EDIT THESE TO YOUR DESIRED OUTPUT FILEPATHS ───
-OUTPUT_PLAYER_CSV_PATH = r"C:/Users/charl/Downloads/OddsFetched/player_stats.csv"
-OUTPUT_TEAM_CSV_PATH   = r"C:/Users/charl/Downloads/OddsFetched/team_stats.csv"
+OUTPUT_PLAYER_CSV_PATH = r"PutPathHere"
+OUTPUT_TEAM_CSV_PATH   = r"PutPathHere"
 # ─────────────────────────────────────────────────────────
 
 
