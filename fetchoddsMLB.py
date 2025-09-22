@@ -3,12 +3,12 @@ import csv
 from datetime import datetime, date, time, timezone
 from requests.exceptions import HTTPError
 
-API_KEY   = "04d4c837f7bcb3224dd30c6adc55becc"
+API_KEY   = # insert API key here
 SPORT_KEY = "baseball_mlb"
 REGIONS   = "us"
 ODDS_FMT  = "american"
 DATE_FMT  = "iso"
-CSV_PATH  = r"C:/Users/charl/Downloads/OddsFetched/odds.csv"  # Path to output CSV
+CSV_PATH  = r"PutPathHere"  # Path to output CSV
 
 # The only supported markets for MLB on the main odds endpoint:
 FEATURED_MARKETS = ["h2h", "spreads", "totals"]
@@ -171,4 +171,5 @@ if __name__ == "__main__":
 
     print(f"Exported odds to CSV: {CSV_PATH}")
     print("Player names are now included in separate 'player_name' column and combined in 'outcome_name' for player props.")
+
 
